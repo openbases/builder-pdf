@@ -4,11 +4,13 @@
 
 > Hi friend! :wave:
 
-[![CircleCI](https://circleci.com/gh/openbases/builder-whedon.svg?style=svg)](https://circleci.com/gh/openbases/builder-whedon)
+[![CircleCI](https://circleci.com/gh/openbases/paper-whedon.svg?style=svg)](https://circleci.com/gh/openbases/paper-whedon)
 
-This is an automated build for a Docker container to serve our favorite, our
-friendly robot, the fantastic [whedon](https://www.github.com/openjournals/whedon),
-specifically to build you a paper! This container serves whedon to build the PDF, but also serves other tests  to validate the paper. You can fork the repository to have an automated build (or preview) of your paper! Let's get started:
+This is a simplified version of [builder-whedon](https://www.github.com/openbases/builder-whedon) to **only** use the pre-build [builder-whedon container]() to generate a paper
+for you! Since we don't need to build the whedon container, we can instead (if you
+desire) build you a container that just serves your paper. An example is provided
+here, serving the [paper-whedon](https://www.github.com/openbases/paper-whedon)
+container.
 
 ## Preparation
 
@@ -38,8 +40,10 @@ paper [here](https://joss.readthedocs.io/en/latest/submitting.html).
 ## Local Usage
 
 You can use this container to build and preview a pdf for your submission to
-an open journals journal. The container is ready for you to go, pre-built on
-Docker Hub as [openbases/builder-whedon](https://hub.docker.com/r/openbases/builder-whedon/) 
+an [openjournals](https://openjournals.github.io) journal. We use the 
+[openbases/builder-whedon](https://hub.docker.com/r/openbases/builder-whedon/) 
+container to drive the build
+
 and you can even look at [tags, manifests, pdfs, and changes over time](https://openbases.github.io/builder-whedon/) for this container. 
 
 We will also be providing entry points to run tests for a submission, but for
