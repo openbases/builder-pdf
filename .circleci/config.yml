@@ -111,6 +111,7 @@ jobs:
     <<: *defaults
     steps:
       - run: *install
+      - setup_remote_docker
       - checkout
       - run: *whedonenv
       - run: *whedon
