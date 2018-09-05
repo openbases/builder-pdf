@@ -69,8 +69,8 @@ whedon: &whedon
         source ${BASH_ENV}
         cd /tmp/src
         echo "1. Starting Whedon Docker bot!"
-        echo "docker run --name whedon  --entrypoint bash -dt ${CONTAINER_NAME}:${DOCKER_TAG}"
-        docker run --name whedon  --entrypoint bash -dt "${CONTAINER_NAME}:${DOCKER_TAG}"
+        echo "docker run --name whedon  --entrypoint bash -dt ${WHEDON_CONTAINER}"
+        docker run --name whedon  --entrypoint bash -dt "${WHEDON_CONTAINER}"
         echo "2. Copying paper stuffs for Whedon..."
         echo "docker cp ./paper/. whedon:/data/"
         docker cp ./paper/. whedon:/data/
