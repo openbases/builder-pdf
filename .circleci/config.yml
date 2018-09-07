@@ -1,0 +1,210 @@
+# This is a CircleCI configuration that you can add to your Github repository,
+# and connect to CircleCI to build a PDF paper with whedon! If you don't
+# define any custom variables, your paper will be generated and available
+# as an artifact. 
+
+# Variables you can customize
+# WHEDON_CONTAINER: is the container that will be used, see default section
+# WHEDON_ARGS: are any special arguments to pass to the whedon container
+
+# The following variables are optional and will give you
+# additional deployments / functionality.
+
+# GITHUB_USER
+# GITHUB_EMAIL if defined, you can deploy your paper back to Github pages.
+
+################################################################################
+# Functions
+################################################################################
+
+# Defaults
+defaults: &defaults
+  docker:
+    - image: docker:18.01.0-ce-git
+  working_directory: /tmp/src
+
+# Installation
+install: &install
+    name: Install parallel gzip, gettext, python3, and jq
+    command: apk add --no-cache pigz python3 gettext jq
+
+# Environment
+sourceenv: &sourceenv
+    name: Source environment variables from the BASH_ENV
+    command: source $BASH_ENV 
+
+whedonenv: &whedonenv
+    name: Define container and whedon names
+    command: |
+        # If not set, define WHEDON_CONTAINER
+        if [ ! -n "${WHEDON_CONTAINER:-}" ]; then
+            WHEDON_CONTAINER="openbases/builder-whedon"
+        fi
+        echo "Whedon builder is ${WHEDON_CONTAINER}"
+        # export to bash environment
+        echo "export WHEDON_CONTAINER=${WHEDON_CONTAINER}" >> ${BASH_ENV}
+        cat ${BASH_ENV}
+
+
+githubsetup: &githubsetup
+    name: Prepare Github account credentials
+    command: |
+        # Only proceed if we minimally have a Github email
+        if [[ -n "${GITHUB_EMAIL:-}" ]];
+            then
+                echo "Preparing Github account credentials"
+                git config --global user.email $GITHUB_EMAIL
+                # If username is defined, use it (otherwuse use circle project)
+                if [[ -n "${GITHUB_USER:-}" ]];
+                    then
+                    git config --global user.name $GITHUB_USER
+                else
+                    git config --global user.name $CIRCLE_PROJECT_USERNAME
+                fi
+        fi
+
+whedon: &whedon
+    name: use whedon docker container to generate pdf
+    command: |
+        source ${BASH_ENV}
+        cd /tmp/src
+        echo "1. Starting Whedon Docker bot!"
+        echo "docker run --name whedon  --entrypoint bash -dt ${WHEDON_CONTAINER}"
+        docker run --name whedon  --entrypoint bash -dt "${WHEDON_CONTAINER}"
+        echo "2. Copying paper stuffs for Whedon..."
+        echo "docker cp ./paper/. whedon:/data/"
+        docker cp ./paper/. whedon:/data/
+        echo "3. Go Whedon Go, generate the PDF!"
+        echo "docker exec whedon /bin/bash /code/entrypoint.sh pdf"
+        docker exec whedon /bin/bash /code/entrypoint.sh pdf /data/paper.md "${WHEDON_ARGS}"
+        echo "4. Obtaining finished paper.pdf"
+        mkdir -p /tmp/paper
+        echo "docker cp whedon:/data/. /tmp/paper"
+        docker cp whedon:/data/. /tmp/paper/
+        echo "5. Creating archive."
+        echo "tar czf paper.tar.gz /tmp/paper"
+        tar czf paper.tar.gz /tmp/paper
+        mv paper.tar.gz /tmp/paper
+        echo "6. Stopping whedon..."
+        docker stop whedon
+        echo "Contents of /tmp"
+        ls /tmp
+        echo "Contents of /tmp/paper"
+        ls /tmp/paper
+
+
+################################################################################
+# Jobs
+################################################################################
+
+
+version: 2
+jobs:
+  setup:
+    <<: *defaults
+    steps:
+      - run: *whedonenv
+      - run: *install
+      - run: *githubsetup
+
+  build:
+    <<: *defaults
+    steps:
+      - run: *install
+      - setup_remote_docker
+      - checkout
+      - run: *whedonenv
+      - run: *whedon
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - src
+            - paper
+
+  manifest:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - run: *whedonenv
+      - run: *githubsetup
+      - run: *install
+      - run:
+          name: Generate Paper Manifest
+          no_output_timeout: 40m
+          command: |
+            source ${BASH_ENV}
+            ls /tmp
+            ls /tmp/paper
+            mkdir -p ${HOME}/.ssh
+            if [[ -n "${GITHUB_EMAIL:-}" ]];
+                then
+                    echo "=== Deploying paper to Github Pages ==="
+                    echo "1. Checking out Github pages branch"
+                    ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+                    git clone "git@github.com:${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git" out
+                    cd out
+                    # either checkout github pages, or create orphan
+                    git checkout gh-pages || git checkout --orphan gh-pages
+                    # Save all previous tags, so we don't pull and re-generate
+                    mkdir -p ../out-old
+                    for ext in tar.gz pdf
+                        do
+                        if /bin/bash -c "ls *.${ext}" 1> /dev/null 2>&1; then
+                                /bin/bash -c "cp *.${ext} ../out-old/" 
+                        fi
+                    done                    
+                    git rm -rf .
+                    # ensure that github pages are ignored
+                    mkdir -p .circleci && cp -a ../.circleci/. .circleci/.
+                    # Copy back previous files
+                    for ext in tar.gz pdf
+                        do
+                           if /bin/bash -c "ls ../out-old/*.${ext}" 1> /dev/null 2>&1; then
+                               /bin/bash -c "cp ../out-old/*.${ext} ${PWD}"
+                        fi
+                    done
+                    cp .circleci/template.html template.html
+                    # replace container name in index.html
+                    envsubst < template.html > index.html
+                    echo "2. Generating paper and archive for latest..."
+
+                    # Need to keep latest also as tag
+                    cp /tmp/paper/paper.pdf paper-latest.pdf
+                    cp /tmp/paper/paper.tar.gz paper-latest.tar.gz
+                    cp /tmp/paper/paper.pdf "paper-${DOCKER_TAG}.pdf"
+                    cp /tmp/paper/paper.tar.gz paper-latest.tar.gz
+
+                    git add -A;
+                    git commit -m "Automated deployment to GitHub Pages ${CIRCLE_SHA1}" --allow-empty
+                    git push origin gh-pages
+            else
+                echo "GITHUB_EMAIL not set, skipping manifest deploy to Github pages"
+            fi
+
+
+################################################################################
+# Workflows
+################################################################################
+
+
+workflows:
+  version: 2
+  build_deploy:
+    jobs:
+      - build:
+          filters:
+            branches:
+              ignore: gh-pages
+            tags:
+              only: /.*/
+
+      # Push the manifest back to Github pages
+      - manifest:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
+            tags:
+              only: /.*/
