@@ -13,6 +13,9 @@
 # GITHUB_USER
 # GITHUB_EMAIL if defined, you can deploy your paper back to Github pages.
 
+# PAPER_VERSION
+# will be first 10 characters of commit, or you can define for a custom
+
 ################################################################################
 # Functions
 ################################################################################
@@ -41,8 +44,13 @@ whedonenv: &whedonenv
             WHEDON_CONTAINER="openbases/builder-whedon"
         fi
         echo "Whedon builder is ${WHEDON_CONTAINER}"
+        # If not set, define PAPER_VERSION (akin to commit version)
+        if [ ! -n "${PAPER_VERSION:-}" ]; then
+            PAPER_VERSION=$(echo "${CIRCLE_SHA1}" | cut -c1-10)
+        fi
         # export to bash environment
         echo "export WHEDON_CONTAINER=${WHEDON_CONTAINER}" >> ${BASH_ENV}
+        echo "export PAPER_VERSION=${PAPER_VERSION}" >> ${BASH_ENV}
         cat ${BASH_ENV}
 
 
@@ -164,15 +172,17 @@ jobs:
                                /bin/bash -c "cp ../out-old/*.${ext} ${PWD}"
                         fi
                     done
+                    echo "2. Preparing template..."
                     cp .circleci/template.html template.html
+                    cp -R .circleci/assets/ ${PWD}
                     # replace container name in index.html
                     envsubst < template.html > index.html
-                    echo "2. Generating paper and archive for latest..."
+                    echo "3. Generating paper and archive for latest..."
 
                     # Need to keep latest also as tag
                     cp /tmp/paper/paper.pdf paper-latest.pdf
                     cp /tmp/paper/paper.tar.gz paper-latest.tar.gz
-                    cp /tmp/paper/paper.pdf "paper-${DOCKER_TAG}.pdf"
+                    cp /tmp/paper/paper.pdf "paper-${PAPER_VERSION}.pdf"
                     cp /tmp/paper/paper.tar.gz paper-latest.tar.gz
 
                     git add -A;

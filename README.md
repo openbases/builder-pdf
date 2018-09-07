@@ -190,3 +190,7 @@ Build the container
 ```bash
 docker build -t openbases/paper-whedon .
 ```
+
+## Credits
+
+ - The beautiful viewer is the slightly modified [ng-pdf-viewer](https://github.com/samrose3/ng-pdf-viewer) from @samrose3.
