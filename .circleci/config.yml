@@ -136,6 +136,7 @@ jobs:
             source ${BASH_ENV}
             ls /tmp
             ls /tmp/paper
+            mkdir -p ${HOME}/.ssh
             if [[ -n "${GITHUB_EMAIL:-}" ]];
                 then
                     echo "=== Deploying paper to Github Pages ==="
