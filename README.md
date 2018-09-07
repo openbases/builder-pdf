@@ -158,14 +158,22 @@ along with your requirements.txt, etc.
 
 ## FAQ
 
-**How do I customize the build or template?**
+**How do I customize the build?**
 
 The circle configuration file is the entire workflow that does build, test, and deploy.
 This literally means you can edit this text file and change any or all behavior. This could
 be as simple as changing some of the text output, to adding an additional set of testing or
-deployment options, or more complex like adding entire new steps in the workflow. The template.html
-is the same! You can tweak it, completely change it, or throw it out and push something entirely
-different back to Github pages. This deployment is open and completely transparent, as it should be.
+deployment options, or more complex like adding entire new steps in the workflow. 
+
+**How do I customize the template?**
+The template.html is the same! You can tweak it, completely change it, or throw it out and push something entirely
+different back to Github pages. It's populated with environment variables, and so if you want
+to add variable content this is how to do it. You can add variables to:
+
+ - an `environment` section defined in the defaults section of the [config.yml](.circleci/config.yml)
+ - directly in the step of the manifest section where you see the template.html being generated
+ - in CircleCI settings (appropriate for secrets)
+
 
 **How do I run builds for pull requests?**
 
