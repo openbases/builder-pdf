@@ -23,7 +23,7 @@
     function pdfMainCtrl($interval) {
         var $ctrl = this;
         var files = [
-            'paper.pdf'
+            'paper-latest.pdf'
         ]
 
         $ctrl.searchQuery = '';
