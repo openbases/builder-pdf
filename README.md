@@ -1,6 +1,6 @@
 # Whedon Paper Builder
 
-![docs/robot.png](https://github.com/openbases/whedon-python/raw/master/docs/img/robot.png)
+![docs/paper-whedon.png](https://github.com/openbases/paper-whedon/raw/master/img/paper-whedon.png)
 
 > Hi friend! :wave:
 
