@@ -1,13 +1,13 @@
-# Whedon Paper Builder
+# Open Bases Paper Builder
 
 ![docs/paper-whedon.png](https://github.com/openbases/paper-whedon/raw/master/img/paper-whedon.png)
 
 > Hi friend! :wave:
 
-[![CircleCI](https://circleci.com/gh/openbases/paper-whedon.svg?style=svg)](https://circleci.com/gh/openbases/paper-whedon)
+[![CircleCI](https://circleci.com/gh/openbases/builder-pdf.svg?style=svg)](https://circleci.com/gh/openbases/builder-pdf)
 
 This is an [openbases](https://openbases.github.io) paper builder
- to **only** use the pre-build [builder-whedon](https://www.github.com/openbases/builder-whedon)
+to use the pre-build [openbases-pdf](https://www.github.com/openbases/openbases-pdf)
 to generate a paper for you! You can:
 
  1. Fork the repository to your Github account
@@ -16,16 +16,15 @@ to generate a paper for you! You can:
 
 The simple setup will give you PDFs for preview as [Artifacts](https://circleci.com/docs/2.0/artifacts/), and depending
 on your needs to you set up environment variables to build and package your
-paper in a container, and then even deploy an interface to show it back to
-Github pages.
+paper to send it back to Github pages and preview [like this](https://openbases.github.io/builder-pdf/).
 
 ## 1. Preparation
 
 First fork the repostitory to your account, and clone the fork.
 
 ```bash
-git clone https://www.github.com/<username>/paper-whedon
-git clone git@github.com:<username>/paper-whedon.git
+git clone https://www.github.com/<username>/builder-pdf
+git clone git@github.com:<username>/builder-pdf.git
 ```
 
 Next, add your paper! You should have a submission (in a folder `paper`) called `paper.md`
@@ -37,8 +36,10 @@ paper
    paper.bib
 ```
 
-If you want a custom logo, add it as `logo.png`. If not, the default for the 
-Journal of Open Software (JOSS) will be used.
+### Custom Logo
+
+If you want a custom logo, add it as `logo.png`. If not, a beautiful icon
+will be selected from [openbases-icons](https://www.github.com/openbases/openbases-icons)
 
 ```bash
 paper
@@ -47,36 +48,39 @@ paper
    logo.png
 ```
 
-### Custom Logo
 
-If you want a custom logo, add it to the [paper](paper) directory named as follows:
+### Custom Latex Template
+
+The same goes for the latex template! To customize it, just add a "latex.template"
+to the same directory
 
 ```
 paper
     paper.md
     paper.bib
-    logo.png
+    latex.template
 ```
 
-An example is provided here, in [paper](paper). You can read guidelines for the
-paper [here](https://joss.readthedocs.io/en/latest/submitting.html).
+If not found, by default, we use the template served 
+by [whedon](https://github.com/openjournals/whedon/blob/master/resources/latex.template)
+An example is provided here, in [paper](paper). 
 
 
 ### Step 2. Configuration
 
 Next, we will talk about setting up the services! If you are interested
-specifically in the [builder-whedon](https://www.github.com/openbases/builder-whedon) 
+specifically in developing the [openbases-pdf](https://www.github.com/openbases/openbases-pdf) 
 doing the heavy lifting to generate the PDF,
-take a look as [his documentation](https://www.github.com/openbases/builder-whedon).
+take a look as [his code](https://www.github.com/openbases/openbases-pdf).
 
 The hidden folder [.circleci/config.yml](.circleci/config.yml) has instructions for
 [CircleCI](https://circleci.com/dashboard/) to automatically discover
 and build your paper. If you choose to deploy back to Github pages, there is 
-also a [template.html](template.html) file that is used as a template. 
+also a [template.html](.circleci/template.html) file that is used as a template. 
 The first does most of the steps required for build and deploy, including:
 
  1.  clone of the repository with your paper folder
- 2.  build your pdf using the builder-whedon container
+ 2.  build your pdf using the openbsaes-pdf container
  3.  (optional) generate a container to serve your paper
  4.  (optional) push back to Github pages
 
@@ -88,9 +92,6 @@ want.
 
 This happens all in the CI, and is ready to go for you! If you go under the "build"
 step in your workflow, you can click on the "artifacts" tab to see your paper outputs.
-
-We will also be providing a template that starts at step 3, so you don't need to wait
-for the builder-whedon container to build (under development!)
 
 ### Step 4. (optional) Github Machine User
 
@@ -142,10 +143,10 @@ Under settings, click on the "Environment Variables" tab. In this
 section, you want to define the following:
 
  *  `GITHUB_USER` and `GITHUB_EMAIL` should be your machine user Github account
- *  `WHEDON_ARGS` should define any additional argument pairs (`--arg1 value1 --bool`) to pass to the [openbases/builder-whedon container entrypoint](https://github.com/openbases/builder-whedon/blob/master/entrypoint.sh). This will be passed as followed:
+ *  `OPENBASES_PAPER_ARGS` should define any additional argument pairs (`--arg1 value1 --bool`) to pass to the [openbases/openbases-pdf container entrypoint](https://github.com/openbases/openbases-pdf/blob/master/entrypoint.sh). This will be passed as followed:
 
 ```bash
-/bin/bash entrypoint.sh paper.md "${WHEDON_ARGS}"
+/bin/bash entrypoint.sh paper.md "${OPENBASES_PAPER_ARGS}"
 ```
 
 ### Step 6. Push and Deploy!
@@ -188,7 +189,7 @@ build by editing the `.circleci/config.yml` file in your repository.
 Build the container
 
 ```bash
-docker build -t openbases/paper-whedon .
+docker build -t openbases/builder-pdf .
 ```
 
 ## Credits
