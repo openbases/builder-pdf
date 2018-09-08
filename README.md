@@ -1,6 +1,6 @@
 # Open Bases Paper Builder
 
-![docs/paper-whedon.png](https://github.com/openbases/paper-whedon/raw/master/img/paper-whedon.png)
+![docs/preview.png](https://github.com/openbases/builder-pdf/raw/master/img/preview.png)
 
 > Hi friend! :wave:
 
@@ -39,7 +39,7 @@ paper
 ### Custom Logo
 
 If you want a custom logo, add it as `logo.png`. If not, a beautiful icon
-will be selected from [openbases-icons](https://www.github.com/openbases/openbases-icons)
+will be selected from [openbases-icons](https://openbases.github.io/openbases-icons/preview)
 
 ```bash
 paper
