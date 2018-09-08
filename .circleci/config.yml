@@ -78,8 +78,8 @@ pdf: &pdf
         source ${BASH_ENV}
         cd /tmp/src
         echo "1. Starting OpenBases PDF Builder bot!"
-        echo "docker run --name openbases-pdf  --entrypoint bash -dt ${OPENBASES_CONTAINER}:${PAPER_VERSION}"
-        docker run --name openbases-pdf  --entrypoint bash -dt "${OPENBASES_CONTAINER}:${PAPER_VERSION}"
+        echo "docker run --name openbases-pdf  --entrypoint bash -dt ${OPENBASES_CONTAINER}"
+        docker run --name openbases-pdf  --entrypoint bash -dt "${OPENBASES_CONTAINER}"
         echo "2. Copying paper stuffs for Open Bases PDF..."
         echo "docker cp ./paper/. openbases-pdf:/data/"
         docker cp ./paper/. openbases-pdf:/data/
