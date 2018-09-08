@@ -1,6 +1,6 @@
 # Open Bases Paper Builder
 
-![docs/preview.png](https://github.com/openbases/builder-pdf/raw/master/img/preview.png)
+![img/preview.png](https://github.com/openbases/builder-pdf/raw/master/img/preview.png)
 
 > Hi friend! :wave:
 
