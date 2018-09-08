@@ -28,8 +28,9 @@ defaults: &defaults
 
 # Installation
 install: &install
-    name: Install parallel gzip, gettext, python3, and jq
-    command: apk add --no-cache pigz python3 gettext jq
+    name: Install parallel gzip, gettext, python3, openbases, and jq
+    command: |
+        apk add --no-cache pigz python3 gettext jq
 
 # Environment
 sourceenv: &sourceenv
@@ -52,33 +53,6 @@ pdfenv: &pdfenv
         echo "export OPENBASES_CONTAINER=${OPENBASES_CONTAINER}" >> ${BASH_ENV}
         echo "export PAPER_VERSION=${PAPER_VERSION}" >> ${BASH_ENV}
         cat ${BASH_ENV}
-
-
-icon: &icon
-    name: select an icon for the openbases pdf
-    command: |
-        if [[ ! -f "/tmp/src/paper/logo.png" && ! -f "/tmp/src/paper/logo.svg" ]]; then
-
-            git clone https://www.github.com/openbases/openbases-icons
-
-            function select_icon() {
-                REPO_BASE=${1:-}
-                1>&2 echo "Icon repository base ${REPO_BASE}"
-                OPENBASES_FOLDERS=(`find ${REPO_BASE} -maxdepth 1 -type d -name [^\.]\* | sed 's:^\./::'`)
-                1>&2 echo "${#OPENBASES_FOLDERS[@]} folders"
-                OPENBASES_FOLDER=${OPENBASES_FOLDERS[$RANDOM % ${#OPENBASES_FOLDERS[@]} ]}
-                1>&2 echo "Selected folder ${OPENBASES_FOLDER}"
-                OPENBASES_ICONS=(`find ${OPENBASES_FOLDER} -maxdepth 1 -type f -name *.svg | sed 's:^\./::'`)
-                echo ${OPENBASES_ICONS[$RANDOM % ${#OPENBASES_ICONS[@]} ]}
-            }
-            OPENBASES_ICON=`select_icon openbases-icons`
-            echo "No logo file in paper folder, generating cuteness!"
-            echo ${OPENBASES_ICON}
-            cp ${OPENBASES_ICON} /tmp/src/paper/logo.svg
-        else
-            echo "Found logo file in paper folder, not using openbases-icon"
-        fi
-
 
 githubsetup: &githubsetup
     name: Prepare Github account credentials
@@ -148,7 +122,6 @@ jobs:
       - setup_remote_docker
       - checkout
       - run: *pdfenv
-      - run: *icon
       - run: *pdf
       - persist_to_workspace:
           root: /tmp
